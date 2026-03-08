@@ -13,8 +13,8 @@ let mode="bw"
 
 const chars="█▓▒@#MWB8&%$+=-:. "
 
+let faceDetector
 let faces=[]
-let faceDetector=null
 
 navigator.mediaDevices.getUserMedia({
 video:{facingMode:"user"}
@@ -44,7 +44,7 @@ ascii.width=360
 ascii.height=1140
 
 process.width=40
-process.height=126
+process.height=30
 
 detectFaces()
 
@@ -132,7 +132,7 @@ let face=insideFace(x,y)
 
 if(face){
 
-ctx.font="bold "+(ch*2)+"px monospace"
+ctx.font="bold "+(ch*8)+"px monospace"
 
 ctx.fillStyle="white"
 
@@ -146,13 +146,10 @@ ctx.font="bold "+ch+"px monospace"
 
 if(mode==="bw"){
 
-if(brightness>140){
+let index=Math.floor(brightness/255*(chars.length-1))
+char=chars[index]
+
 ctx.fillStyle="white"
-char="."
-}else{
-ctx.fillStyle="white"
-char="█"
-}
 
 }else{
 
