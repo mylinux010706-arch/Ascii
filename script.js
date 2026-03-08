@@ -1,5 +1,4 @@
 const video=document.getElementById("video")
-
 const ascii=document.getElementById("ascii")
 const process=document.getElementById("process")
 
@@ -13,8 +12,8 @@ let mode="bw"
 
 const chars="█▓▒@#MWB8&%$+=-:. "
 
-let faceDetector
 let faces=[]
+let faceDetector
 
 navigator.mediaDevices.getUserMedia({
 video:{facingMode:"user"}
@@ -23,7 +22,7 @@ video.srcObject=stream
 })
 
 if("FaceDetector" in window){
-faceDetector=new FaceDetector({fastMode:true,maxDetectedFaces:3})
+faceDetector=new FaceDetector({fastMode:true,maxDetectedFaces:2})
 }
 
 async function detectFaces(){
@@ -31,82 +30,56 @@ if(!faceDetector)return
 try{
 faces=await faceDetector.detect(video)
 }catch(e){}
-requestAnimationFrame(detectFaces)
 }
+
+setInterval(detectFaces,500)
 
 video.onloadeddata=()=>{
 
 ascii.width=640
 ascii.height=480
 
-process.width=40
-process.height=30
-
-detectFaces()
-
 draw()
+
 }
 
 bwBtn.onclick=()=>mode="bw"
 colorBtn.onclick=()=>mode="color"
 
-function insideFace(x,y){
-
-for(let f of faces){
-
-let box=f.boundingBox
-
-let fx=box.x/video.videoWidth*process.width
-let fy=box.y/video.videoHeight*process.height
-let fw=box.width/video.videoWidth*process.width
-let fh=box.height/video.videoHeight*process.height
-
-if(x>fx && x<fx+fw && y>fy && y<fy+fh){
-return true
-}
-
-}
-
-return false
-}
-
 function draw(){
 
-let vw=video.videoWidth
-let vh=video.videoHeight
+let gridX
+let gridY
 
-let targetRatio=4/3
-let videoRatio=vw/vh
-
-let sx=0
-let sy=0
-let sw=vw
-let sh=vh
-
-if(videoRatio>targetRatio){
-sw=vh*targetRatio
-sx=(vw-sw)/2
+if(mode==="color"){
+gridX=28
+gridY=21
 }else{
-sh=vw/targetRatio
-sy=(vh-sh)/2
+gridX=60
+gridY=45
 }
 
-pctx.drawImage(video,sx,sy,sw,sh,0,0,process.width,process.height)
+process.width=gridX
+process.height=gridY
 
-let frame=pctx.getImageData(0,0,process.width,process.height)
+pctx.drawImage(video,0,0,gridX,gridY)
+
+let frame=pctx.getImageData(0,0,gridX,gridY)
 let data=frame.data
 
 ctx.fillStyle="black"
 ctx.fillRect(0,0,ascii.width,ascii.height)
 
-let cw=ascii.width/process.width
-let ch=ascii.height/process.height
+let cw=ascii.width/gridX
+let ch=ascii.height/gridY
 
-for(let y=0;y<process.height;y++){
+ctx.font="bold "+ch+"px monospace"
 
-for(let x=0;x<process.width;x++){
+for(let y=0;y<gridY;y++){
 
-let i=(y*process.width+x)*4
+for(let x=0;x<gridX;x++){
+
+let i=(y*gridX+x)*4
 
 let r=data[i]
 let g=data[i+1]
@@ -119,34 +92,15 @@ let char=chars[Math.floor(brightness/255*(chars.length-1))]
 let px=x*cw
 let py=y*ch
 
-let face=insideFace(x,y)
-
-if(face){
-
-ctx.font="bold "+(ch*50)+"px monospace"
-
-if(brightness>120){
-ctx.fillStyle="white"
-}else{
-ctx.fillStyle="white"
-char="█"
-}
-
-ctx.fillText(char,px,py)
-
-}else{
-
-ctx.font="bold "+ch+"px monospace"
-
 if(mode==="bw"){
 
-if(brightness>140){
-ctx.fillStyle="white"
+if(brightness>150){
 char="."
 }else{
-ctx.fillStyle="white"
 char="█"
 }
+
+ctx.fillStyle="white"
 
 }else{
 
@@ -160,7 +114,29 @@ ctx.fillText(char,px,py)
 
 }
 
+faces.forEach(face=>{
+
+let box=face.boundingBox
+
+let fx=box.x/video.videoWidth*ascii.width
+let fy=box.y/video.videoHeight*ascii.height
+
+let fw=box.width/video.videoWidth*ascii.width
+let fh=box.height/video.videoHeight*ascii.height
+
+ctx.fillStyle="black"
+ctx.fillRect(fx,fy,fw,fh)
+
+ctx.fillStyle="white"
+ctx.font="bold 50px monospace"
+
+for(let y=fy;y<fy+fh;y+=50){
+for(let x=fx;x<fx+fw;x+=50){
+ctx.fillText("X",x,y)
 }
+}
+
+})
 
 requestAnimationFrame(draw)
 
