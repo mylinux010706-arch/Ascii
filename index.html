@@ -1,10 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ASCII Camera</title>
+<title>ASCII Cam</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
@@ -12,24 +11,23 @@
 
 <div class="app">
 
-<h1>ASCII Camera</h1>
+<h2>ASCII Camera</h2>
 
-<div class="camera-box">
+<div class="camera">
 <video id="video" autoplay playsinline></video>
-<canvas id="asciiCanvas"></canvas>
-<canvas id="processCanvas"></canvas>
+<canvas id="ascii"></canvas>
+<canvas id="process"></canvas>
 </div>
 
-<div class="modes">
-<button id="colorMode">Color</button>
-<button id="greenMode">Hacker</button>
-<button id="whiteMode">White</button>
+<div class="mode">
+<button id="bw">Hitam Putih</button>
+<button id="color">Berwarna</button>
 </div>
 
-<div class="record">
-<button id="startRecord">Start</button>
-<button id="stopRecord">Stop</button>
-<a id="downloadLink">Download</a>
+<div class="controls">
+<button id="record">Record</button>
+<button id="stop">Stop</button>
+<a id="download">Download</a>
 </div>
 
 </div>
