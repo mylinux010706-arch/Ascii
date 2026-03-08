@@ -1,5 +1,4 @@
 const video=document.getElementById("video")
-
 const ascii=document.getElementById("ascii")
 const process=document.getElementById("process")
 
@@ -9,51 +8,64 @@ const pctx=process.getContext("2d")
 const bwBtn=document.getElementById("bw")
 const colorBtn=document.getElementById("color")
 
-const recordBtn=document.getElementById("recordBtn")
-const downloadBtn=document.getElementById("downloadBtn")
-
-const timer=document.getElementById("timer")
-
 let mode="bw"
 
-const chars="█▓▒#@MW8B&%$+=-:. "
+const chars="█▓▒@#MW8B&%$+=-:. "
 
 let faceDetector
 let faces=[]
 
-let recorder
-let chunks=[]
-
-let recording=false
-
-let seconds=0
-
-let timerInterval
 
 
+/* camera */
+
+navigator.mediaDevices.getUserMedia({
+
+video:{facingMode:"user"}
+
+}).then(stream=>{
+
+video.srcObject=stream
+
+})
+
+
+
+/* face detector */
 
 if("FaceDetector" in window){
+
 faceDetector=new FaceDetector({fastMode:true,maxDetectedFaces:5})
+
 }
 
 
 
-navigator.mediaDevices.getUserMedia({
-video:{facingMode:"user"}
-}).then(stream=>{
-video.srcObject=stream
-video.play()
-})
+async function detectFaces(){
+
+if(!faceDetector)return
+
+try{
+
+faces=await faceDetector.detect(video)
+
+}catch(e){}
+
+requestAnimationFrame(detectFaces)
+
+}
 
 
+
+/* setup */
 
 video.onloadeddata=()=>{
 
 ascii.width=640
 ascii.height=480
 
-process.width=60
-process.height=45
+process.width=80
+process.height=60
 
 detectFaces()
 
@@ -68,54 +80,9 @@ colorBtn.onclick=()=>mode="color"
 
 
 
-async function detectFaces(){
-
-if(!faceDetector)return
-
-try{
-faces=await faceDetector.detect(video)
-}catch(e){}
-
-requestAnimationFrame(detectFaces)
-
-}
-
-
-
-function getChar(brightness){
-
-let index=Math.floor(brightness/255*(chars.length-1))
-
-return chars[index]
-
-}
-
-
-
-function insideFace(x,y){
-
-for(let f of faces){
-
-let box=f.boundingBox
-
-let fx=box.x/video.videoWidth*process.width
-let fy=box.y/video.videoHeight*process.height
-let fw=box.width/video.videoWidth*process.width
-let fh=box.height/video.videoHeight*process.height
-
-if(x>fx && x<fx+fw && y>fy && y<fy+fh){
-return true
-}
-
-}
-
-return false
-
-}
-
-
-
 function draw(){
+
+/* crop video supaya tidak gepeng */
 
 let vw=video.videoWidth
 let vh=video.videoHeight
@@ -158,30 +125,15 @@ ctx.fillRect(0,0,ascii.width,ascii.height)
 let cw=ascii.width/process.width
 let ch=ascii.height/process.height
 
-ctx.font="bold "+(ch*1.2)+"px monospace"
+ctx.font="bold "+ch+"px monospace"
 
 
+
+/* ascii render */
 
 for(let y=0;y<process.height;y++){
 
 for(let x=0;x<process.width;x++){
-
-if(insideFace(x,y)){
-
-let px=x*cw
-let py=y*ch
-
-ctx.fillStyle="black"
-ctx.fillRect(px,py,cw,ch)
-
-ctx.fillStyle="white"
-ctx.fillText("X",px,py)
-
-continue
-
-}
-
-
 
 let i=(y*process.width+x)*4
 
@@ -191,9 +143,7 @@ let b=data[i+2]
 
 let brightness=(r*0.299+g*0.587+b*0.114)
 
-
-
-let char=getChar(brightness)
+let char=chars[Math.floor(brightness/255*(chars.length-1))]
 
 let px=x*cw
 let py=y*ch
@@ -202,21 +152,25 @@ let py=y*ch
 
 if(mode==="bw"){
 
-if(brightness>140){
-
-ctx.fillStyle="white"
-
-}else{
-
-ctx.fillStyle="white"
+if(brightness<90){
 
 char="█"
 
-}
+}else if(brightness<160){
+
+char="▓"
 
 }else{
 
-ctx.fillStyle="rgb("+r+","+g+","+b+")"
+char="."
+
+}
+
+ctx.fillStyle="white"
+
+}else{
+
+ctx.fillStyle=`rgb(${r},${g},${b})`
 
 }
 
@@ -230,89 +184,54 @@ ctx.fillText(char,px,py)
 
 
 
+/* FACE MASK (menutup wajah total) */
+
+faces.forEach(face=>{
+
+let box=face.boundingBox
+
+
+
+let fx=box.x/video.videoWidth*ascii.width
+let fy=box.y/video.videoHeight*ascii.height
+
+let fw=box.width/video.videoWidth*ascii.width
+let fh=box.height/video.videoHeight*ascii.height
+
+
+
+/* background hitam */
+
+ctx.fillStyle="black"
+
+ctx.fillRect(fx,fy,fw,fh)
+
+
+
+/* isi X */
+
+ctx.fillStyle="white"
+
+let size=20
+
+ctx.font="bold "+size+"px monospace"
+
+
+
+for(let y=fy;y<fy+fh;y+=size){
+
+for(let x=fx;x<fx+fw;x+=size){
+
+ctx.fillText("X",x,y)
+
+}
+
+}
+
+})
+
+
+
 requestAnimationFrame(draw)
-
-}
-
-
-
-recordBtn.onclick=()=>{
-
-if(!recording){
-startRecording()
-}else{
-stopRecording()
-}
-
-}
-
-
-
-function startRecording(){
-
-let stream=ascii.captureStream(30)
-
-recorder=new MediaRecorder(stream)
-
-chunks=[]
-
-recorder.ondataavailable=e=>chunks.push(e.data)
-
-recorder.onstop=()=>{
-
-let blob=new Blob(chunks,{type:"video/webm"})
-
-let url=URL.createObjectURL(blob)
-
-downloadBtn.href=url
-downloadBtn.download="ascii-video.webm"
-
-downloadBtn.style.display="inline-block"
-
-}
-
-
-
-recorder.start()
-
-recording=true
-
-recordBtn.textContent="Stop Recording"
-
-downloadBtn.style.display="none"
-
-seconds=0
-
-timerInterval=setInterval(updateTimer,1000)
-
-}
-
-
-
-function stopRecording(){
-
-recorder.stop()
-
-recording=false
-
-recordBtn.textContent="Start Recording"
-
-clearInterval(timerInterval)
-
-}
-
-
-
-function updateTimer(){
-
-seconds++
-
-let m=Math.floor(seconds/60)
-let s=seconds%60
-
-if(m<10)m="0"+m
-if(s<10)s="0"+s
-
-timer.textContent=m+":"+s
 
 }
