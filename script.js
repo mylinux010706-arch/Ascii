@@ -8,16 +8,20 @@ const pctx=process.getContext("2d")
 const bwBtn=document.getElementById("bw")
 const colorBtn=document.getElementById("color")
 
-const recordBtn=document.getElementById("record")
-const stopBtn=document.getElementById("stop")
-const download=document.getElementById("download")
+const recordBtn=document.getElementById("recordBtn")
+const downloadBtn=document.getElementById("downloadBtn")
+const timer=document.getElementById("timer")
 
 let mode="bw"
 
-const chars="@$#%&*+=-:. "
+const chars="@#%*+=-:. "
 
 let recorder
 let chunks=[]
+
+let recording=false
+let seconds=0
+let timerInterval
 
 navigator.mediaDevices.getUserMedia({video:true})
 .then(stream=>{
@@ -30,8 +34,8 @@ video.onloadeddata=()=>{
 ascii.width=400
 ascii.height=400
 
-process.width=80
-process.height=80
+process.width=60
+process.height=60
 
 draw()
 
@@ -69,14 +73,14 @@ let r=data[i]
 let g=data[i+1]
 let b=data[i+2]
 
-let bright=(r+g+b)/3
+let brightness=(r+g+b)/3
 
 let char=randomChar()
 
 if(mode==="color"){
 ctx.fillStyle="rgb("+r+","+g+","+b+")"
 }else{
-ctx.fillStyle=bright>120?"white":"black"
+ctx.fillStyle=brightness>120?"white":"black"
 }
 
 ctx.fillText(char,x*cw,y*ch)
@@ -91,6 +95,20 @@ requestAnimationFrame(draw)
 
 recordBtn.onclick=()=>{
 
+if(!recording){
+
+startRecording()
+
+}else{
+
+stopRecording()
+
+}
+
+}
+
+function startRecording(){
+
 let stream=ascii.captureStream(30)
 
 recorder=new MediaRecorder(stream)
@@ -104,17 +122,51 @@ chunks.push(e.data)
 recorder.onstop=()=>{
 
 let blob=new Blob(chunks,{type:"video/webm"})
+
 let url=URL.createObjectURL(blob)
 
-download.href=url
-download.download="ascii-video.webm"
+downloadBtn.href=url
+downloadBtn.download="ascii-video.webm"
+
+downloadBtn.style.display="inline-block"
 
 }
 
 recorder.start()
 
+recording=true
+recordBtn.textContent="Stop Recording"
+
+downloadBtn.style.display="none"
+
+seconds=0
+
+timerInterval=setInterval(updateTimer,1000)
+
 }
 
-stopBtn.onclick=()=>{
-if(recorder) recorder.stop()
+function stopRecording(){
+
+recorder.stop()
+
+recording=false
+
+recordBtn.textContent="Start Recording"
+
+clearInterval(timerInterval)
+
+}
+
+function updateTimer(){
+
+seconds++
+
+let m=Math.floor(seconds/60)
+let s=seconds%60
+
+if(m<10)m="0"+m
+if(s<10)s="0"+s
+
+timer.textContent=m+":"+s
+
 }
