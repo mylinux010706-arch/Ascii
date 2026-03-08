@@ -16,7 +16,7 @@ const timer=document.getElementById("timer")
 
 let mode="bw"
 
-const chars="@#$%&MWB8*oahkbdpqwmZ0OQLCJUYXzcvunxrjft/|(){}[]<>?-_+~!;:,.^`"
+const chars="@#$%&MWB8*oahkbdpqwmZ0OQLCJUYXzcvunxrjft/|(){}[]<>?-_+~!;:,. "
 
 let recorder
 let chunks=[]
@@ -46,11 +46,13 @@ video.play()
 
 video.onloadeddata=()=>{
 
-ascii.width=360
-ascii.height=640
+/* iphone 13 portrait ratio */
 
-process.width=45
-process.height=80
+ascii.width=360
+ascii.height=780
+
+process.width=60
+process.height=130
 
 draw()
 
