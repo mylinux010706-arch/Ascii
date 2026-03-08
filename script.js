@@ -1,107 +1,85 @@
 const video=document.getElementById("video")
-const asciiCanvas=document.getElementById("asciiCanvas")
-const processCanvas=document.getElementById("processCanvas")
+const ascii=document.getElementById("ascii")
+const process=document.getElementById("process")
 
-const asciiCtx=asciiCanvas.getContext("2d")
-const processCtx=processCanvas.getContext("2d")
+const ctx=ascii.getContext("2d")
+const pctx=process.getContext("2d")
 
-const colorBtn=document.getElementById("colorMode")
-const greenBtn=document.getElementById("greenMode")
-const whiteBtn=document.getElementById("whiteMode")
+const bwBtn=document.getElementById("bw")
+const colorBtn=document.getElementById("color")
 
-const startBtn=document.getElementById("startRecord")
-const stopBtn=document.getElementById("stopRecord")
-const downloadLink=document.getElementById("downloadLink")
+const recordBtn=document.getElementById("record")
+const stopBtn=document.getElementById("stop")
+const download=document.getElementById("download")
 
-let mode="color"
+let mode="bw"
 
-const chars="@$#%&BWM*oahkbdpqwmZ0OQLCJUYXzcvunxrjft/|()1{}[]?-_+~<>i!lI;:,^`'. "
+const chars="@$#%&*+=-:. "
 
 let recorder
 let chunks=[]
 
-navigator.mediaDevices.getUserMedia({
-video:{
-facingMode:"user",
-width:{ideal:1280},
-height:{ideal:720}
-}
-}).then(stream=>{
+navigator.mediaDevices.getUserMedia({video:true})
+.then(stream=>{
 video.srcObject=stream
 video.play()
 })
 
-colorBtn.onclick=()=>mode="color"
-greenBtn.onclick=()=>mode="green"
-whiteBtn.onclick=()=>mode="white"
+video.onloadeddata=()=>{
 
-video.addEventListener("play",()=>{
+ascii.width=400
+ascii.height=400
 
-asciiCanvas.width=420
-asciiCanvas.height=520
-
-processCanvas.width=120
-processCanvas.height=150
+process.width=80
+process.height=80
 
 draw()
 
-})
+}
 
-function randomChar(brightness){
+bwBtn.onclick=()=>mode="bw"
+colorBtn.onclick=()=>mode="color"
 
-let index=Math.floor(Math.random()*chars.length)
-
-if(brightness<50) index=Math.floor(Math.random()*10)
-if(brightness<100) index=Math.floor(Math.random()*20)
-if(brightness<150) index=Math.floor(Math.random()*30)
-
-return chars[index]
-
+function randomChar(){
+return chars[Math.floor(Math.random()*chars.length)]
 }
 
 function draw(){
 
-processCtx.drawImage(video,0,0,processCanvas.width,processCanvas.height)
+pctx.drawImage(video,0,0,process.width,process.height)
 
-let frame=processCtx.getImageData(0,0,processCanvas.width,processCanvas.height)
-
+let frame=pctx.getImageData(0,0,process.width,process.height)
 let data=frame.data
 
-asciiCtx.fillStyle="black"
-asciiCtx.fillRect(0,0,asciiCanvas.width,asciiCanvas.height)
+ctx.fillStyle="black"
+ctx.fillRect(0,0,ascii.width,ascii.height)
 
-let cellW=asciiCanvas.width/processCanvas.width
-let cellH=asciiCanvas.height/processCanvas.height
+let cw=ascii.width/process.width
+let ch=ascii.height/process.height
 
-asciiCtx.font=cellH+"px monospace"
+ctx.font=ch+"px monospace"
 
-for(let y=0;y<processCanvas.height;y++){
+for(let y=0;y<process.height;y++){
 
-for(let x=0;x<processCanvas.width;x++){
+for(let x=0;x<process.width;x++){
 
-let i=(y*processCanvas.width+x)*4
+let i=(y*process.width+x)*4
 
 let r=data[i]
 let g=data[i+1]
 let b=data[i+2]
 
-let brightness=(r+g+b)/3
+let bright=(r+g+b)/3
 
-let char=randomChar(brightness)
+let char=randomChar()
 
 if(mode==="color"){
-asciiCtx.fillStyle="rgb("+r+","+g+","+b+")"
+ctx.fillStyle="rgb("+r+","+g+","+b+")"
+}else{
+ctx.fillStyle=bright>120?"white":"black"
 }
 
-if(mode==="green"){
-asciiCtx.fillStyle="#00ff88"
-}
-
-if(mode==="white"){
-asciiCtx.fillStyle="white"
-}
-
-asciiCtx.fillText(char,x*cellW,y*cellH)
+ctx.fillText(char,x*cw,y*ch)
 
 }
 
@@ -111,9 +89,9 @@ requestAnimationFrame(draw)
 
 }
 
-startBtn.onclick=()=>{
+recordBtn.onclick=()=>{
 
-let stream=asciiCanvas.captureStream(30)
+let stream=ascii.captureStream(30)
 
 recorder=new MediaRecorder(stream)
 
@@ -126,11 +104,10 @@ chunks.push(e.data)
 recorder.onstop=()=>{
 
 let blob=new Blob(chunks,{type:"video/webm"})
-
 let url=URL.createObjectURL(blob)
 
-downloadLink.href=url
-downloadLink.download="ascii-video.webm"
+download.href=url
+download.download="ascii-video.webm"
 
 }
 
@@ -139,9 +116,5 @@ recorder.start()
 }
 
 stopBtn.onclick=()=>{
-
-if(recorder){
-recorder.stop()
-}
-
+if(recorder) recorder.stop()
 }
