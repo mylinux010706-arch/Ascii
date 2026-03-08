@@ -1,49 +1,85 @@
 const video=document.getElementById("video")
-const canvas=document.getElementById("canvas")
-const ctx=canvas.getContext("2d")
-const ascii=document.getElementById("ascii")
+const asciiCanvas=document.getElementById("asciiCanvas")
+const processCanvas=document.getElementById("processCanvas")
 
-const colorBtn=document.getElementById("colorBtn")
-const monoBtn=document.getElementById("monoBtn")
+const asciiCtx=asciiCanvas.getContext("2d")
+const processCtx=processCanvas.getContext("2d")
 
-let colorMode=true
+const colorBtn=document.getElementById("colorMode")
+const greenBtn=document.getElementById("greenMode")
+const whiteBtn=document.getElementById("whiteMode")
 
-const chars=" .:-=+*#%@"
+const startBtn=document.getElementById("startRecord")
+const stopBtn=document.getElementById("stopRecord")
+const downloadLink=document.getElementById("downloadLink")
 
-navigator.mediaDevices.getUserMedia({video:true})
-.then(stream=>{
+let mode="color"
+
+const chars="@$#%&BWM*oahkbdpqwmZ0OQLCJUYXzcvunxrjft/|()1{}[]?-_+~<>i!lI;:,^`'. "
+
+let recorder
+let chunks=[]
+
+navigator.mediaDevices.getUserMedia({
+video:{
+facingMode:"user",
+width:{ideal:1280},
+height:{ideal:720}
+}
+}).then(stream=>{
 video.srcObject=stream
 video.play()
 })
 
-colorBtn.onclick=()=>{
-colorMode=true
-}
-
-monoBtn.onclick=()=>{
-colorMode=false
-}
+colorBtn.onclick=()=>mode="color"
+greenBtn.onclick=()=>mode="green"
+whiteBtn.onclick=()=>mode="white"
 
 video.addEventListener("play",()=>{
-canvas.width=160
-canvas.height=120
+
+asciiCanvas.width=420
+asciiCanvas.height=520
+
+processCanvas.width=120
+processCanvas.height=150
+
 draw()
+
 })
+
+function randomChar(brightness){
+
+let index=Math.floor(Math.random()*chars.length)
+
+if(brightness<50) index=Math.floor(Math.random()*10)
+if(brightness<100) index=Math.floor(Math.random()*20)
+if(brightness<150) index=Math.floor(Math.random()*30)
+
+return chars[index]
+
+}
 
 function draw(){
 
-ctx.drawImage(video,0,0,canvas.width,canvas.height)
+processCtx.drawImage(video,0,0,processCanvas.width,processCanvas.height)
 
-let frame=ctx.getImageData(0,0,canvas.width,canvas.height)
+let frame=processCtx.getImageData(0,0,processCanvas.width,processCanvas.height)
+
 let data=frame.data
 
-let text=""
+asciiCtx.fillStyle="black"
+asciiCtx.fillRect(0,0,asciiCanvas.width,asciiCanvas.height)
 
-for(let y=0;y<canvas.height;y+=2){
+let cellW=asciiCanvas.width/processCanvas.width
+let cellH=asciiCanvas.height/processCanvas.height
 
-for(let x=0;x<canvas.width;x++){
+asciiCtx.font=cellH+"px monospace"
 
-let i=(y*canvas.width+x)*4
+for(let y=0;y<processCanvas.height;y++){
+
+for(let x=0;x<processCanvas.width;x++){
+
+let i=(y*processCanvas.width+x)*4
 
 let r=data[i]
 let g=data[i+1]
@@ -51,28 +87,61 @@ let b=data[i+2]
 
 let brightness=(r+g+b)/3
 
-let charIndex=Math.floor(brightness/255*(chars.length-1))
+let char=randomChar(brightness)
 
-let char=chars[charIndex]
+if(mode==="color"){
+asciiCtx.fillStyle="rgb("+r+","+g+","+b+")"
+}
 
-if(colorMode){
+if(mode==="green"){
+asciiCtx.fillStyle="#00ff88"
+}
 
-text+="<span style='color:rgb("+r+","+g+","+b+")'>"+char+"</span>"
+if(mode==="white"){
+asciiCtx.fillStyle="white"
+}
 
-}else{
-
-text+=char
+asciiCtx.fillText(char,x*cellW,y*cellH)
 
 }
 
 }
-
-text+="\n"
-
-}
-
-ascii.innerHTML=text
 
 requestAnimationFrame(draw)
+
+}
+
+startBtn.onclick=()=>{
+
+let stream=asciiCanvas.captureStream(30)
+
+recorder=new MediaRecorder(stream)
+
+chunks=[]
+
+recorder.ondataavailable=e=>{
+chunks.push(e.data)
+}
+
+recorder.onstop=()=>{
+
+let blob=new Blob(chunks,{type:"video/webm"})
+
+let url=URL.createObjectURL(blob)
+
+downloadLink.href=url
+downloadLink.download="ascii-video.webm"
+
+}
+
+recorder.start()
+
+}
+
+stopBtn.onclick=()=>{
+
+if(recorder){
+recorder.stop()
+}
 
 }
