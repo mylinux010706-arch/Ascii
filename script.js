@@ -16,10 +16,9 @@ const timer=document.getElementById("timer")
 
 let mode="bw"
 
-const chars="@#MWB8&%$xo+;:."
+const chars="█▓▒@#MWB8&%$Xxo+=-:. "
 
 let faceDetector
-
 let faces=[]
 
 let recorder
@@ -59,8 +58,8 @@ video.onloadeddata=()=>{
 ascii.width=640
 ascii.height=480
 
-process.width=80
-process.height=60
+process.width=64
+process.height=48
 
 detectFaces()
 
@@ -169,7 +168,7 @@ ctx.fillRect(0,0,ascii.width,ascii.height)
 let cw=ascii.width/process.width
 let ch=ascii.height/process.height
 
-ctx.font=ch+"px monospace"
+ctx.font="bold "+(ch*1.2)+"px monospace"
 
 
 
@@ -186,8 +185,6 @@ let b=data[i+2]
 let brightness=(r+g+b)/3
 
 let char=getChar(brightness)
-
-
 
 let face=insideFace(x,y)
 
@@ -214,7 +211,14 @@ ctx.fillStyle="white"
 
 
 
-ctx.fillText(char,x*cw,y*ch)
+let px=x*cw
+let py=y*ch
+
+ctx.strokeStyle="black"
+ctx.lineWidth=2
+
+ctx.strokeText(char,px,py)
+ctx.fillText(char,px,py)
 
 }
 
