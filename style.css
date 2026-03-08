@@ -1,61 +1,50 @@
 body{
 margin:0;
 background:black;
-color:white;
 font-family:monospace;
 display:flex;
 justify-content:center;
 }
 
 .app{
-width:100%;
-max-width:520px;
-padding:10px;
+width:95%;
+max-width:420px;
 text-align:center;
+color:white;
 }
 
-h1{
-font-size:28px;
-margin-bottom:10px;
-}
-
-.camera-box{
-position:relative;
+.camera{
 width:100%;
+aspect-ratio:1/1;
+position:relative;
 }
 
 video{
 display:none;
 }
 
-#asciiCanvas{
+#ascii{
 width:100%;
+height:100%;
 background:black;
-border-radius:8px;
+border-radius:10px;
 }
 
-#processCanvas{
+#process{
 display:none;
 }
 
-.modes{
+.mode{
 margin-top:10px;
-display:flex;
-gap:8px;
-justify-content:center;
-flex-wrap:wrap;
 }
 
-.record{
+.controls{
 margin-top:10px;
-display:flex;
-gap:8px;
-justify-content:center;
-flex-wrap:wrap;
 }
 
-button{
-padding:10px 16px;
+button,a{
+padding:10px 15px;
+margin:4px;
 border:none;
 border-radius:6px;
 background:#00ffaa;
@@ -64,9 +53,7 @@ font-weight:bold;
 }
 
 a{
-padding:10px 16px;
-background:#008cff;
+background:#0090ff;
 color:white;
-border-radius:6px;
 text-decoration:none;
 }
