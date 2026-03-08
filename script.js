@@ -31,7 +31,9 @@ let timerInterval
 
 navigator.mediaDevices.getUserMedia({
 
-video:true
+video:{
+facingMode:"user"
+}
 
 }).then(stream=>{
 
