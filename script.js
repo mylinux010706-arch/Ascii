@@ -40,8 +40,8 @@ requestAnimationFrame(detectFaces)
 
 video.onloadeddata=()=>{
 
-ascii.width=360
-ascii.height=1140
+ascii.width=640
+ascii.height=480
 
 process.width=40
 process.height=30
@@ -80,7 +80,7 @@ function draw(){
 let vw=video.videoWidth
 let vh=video.videoHeight
 
-let targetRatio=6/19
+let targetRatio=4/3
 let videoRatio=vw/vh
 
 let sx=0
@@ -132,11 +132,11 @@ let face=insideFace(x,y)
 
 if(face){
 
-ctx.font="bold "+(ch*8)+"px monospace"
+ctx.font="bold "+(ch*2)+"px monospace"
 
 ctx.fillStyle="white"
 
-char="X"
+char="█"
 
 ctx.fillText(char,px,py)
 
