@@ -1,4 +1,5 @@
 const video=document.getElementById("video")
+
 const ascii=document.getElementById("ascii")
 const process=document.getElementById("process")
 
@@ -12,44 +13,69 @@ let mode="bw"
 
 const chars="█▓▒@#MWB8&%$+=-:. "
 
+let faceDetector
+let faces=[]
+
 navigator.mediaDevices.getUserMedia({
 video:{facingMode:"user"}
 }).then(stream=>{
 video.srcObject=stream
 })
 
+if("FaceDetector" in window){
+faceDetector=new FaceDetector({fastMode:true,maxDetectedFaces:3})
+}
+
+async function detectFaces(){
+if(!faceDetector)return
+try{
+faces=await faceDetector.detect(video)
+}catch(e){}
+requestAnimationFrame(detectFaces)
+}
+
 video.onloadeddata=()=>{
 
-ascii.width=360
-ascii.height=640
+ascii.width=640
+ascii.height=480
+
+process.width=40
+process.height=30
+
+detectFaces()
 
 draw()
-
 }
 
 bwBtn.onclick=()=>mode="bw"
 colorBtn.onclick=()=>mode="color"
 
-function draw(){
+function insideFace(x,y){
 
-let gridX
-let gridY
+for(let f of faces){
 
-if(mode==="color"){
-gridX=28
-gridY=50
-}else{
-gridX=40
-gridY=72
+let box=f.boundingBox
+
+let fx=box.x/video.videoWidth*process.width
+let fy=box.y/video.videoHeight*process.height
+let fw=box.width/video.videoWidth*process.width
+let fh=box.height/video.videoHeight*process.height
+
+if(x>fx && x<fx+fw && y>fy && y<fy+fh){
+return true
 }
 
-process.width=gridX
-process.height=gridY
+}
+
+return false
+}
+
+function draw(){
 
 let vw=video.videoWidth
 let vh=video.videoHeight
 
-let targetRatio=9/16
+let targetRatio=4/3
 let videoRatio=vw/vh
 
 let sx=0
@@ -65,24 +91,22 @@ sh=vw/targetRatio
 sy=(vh-sh)/2
 }
 
-pctx.drawImage(video,sx,sy,sw,sh,0,0,gridX,gridY)
+pctx.drawImage(video,sx,sy,sw,sh,0,0,process.width,process.height)
 
-let frame=pctx.getImageData(0,0,gridX,gridY)
+let frame=pctx.getImageData(0,0,process.width,process.height)
 let data=frame.data
 
 ctx.fillStyle="black"
 ctx.fillRect(0,0,ascii.width,ascii.height)
 
-let cw=ascii.width/gridX
-let ch=ascii.height/gridY
+let cw=ascii.width/process.width
+let ch=ascii.height/process.height
 
-ctx.font="bold "+ch+"px monospace"
+for(let y=0;y<process.height;y++){
 
-for(let y=0;y<gridY;y++){
+for(let x=0;x<process.width;x++){
 
-for(let x=0;x<gridX;x++){
-
-let i=(y*gridX+x)*4
+let i=(y*process.width+x)*4
 
 let r=data[i]
 let g=data[i+1]
@@ -95,15 +119,34 @@ let char=chars[Math.floor(brightness/255*(chars.length-1))]
 let px=x*cw
 let py=y*ch
 
-if(mode==="bw"){
+let face=insideFace(x,y)
 
-if(brightness>150){
-char="."
+if(face){
+
+ctx.font="bold "+(ch*50)+"px monospace"
+
+if(brightness>120){
+ctx.fillStyle="white"
 }else{
+ctx.fillStyle="white"
 char="█"
 }
 
+ctx.fillText(char,px,py)
+
+}else{
+
+ctx.font="bold "+ch+"px monospace"
+
+if(mode==="bw"){
+
+if(brightness>140){
 ctx.fillStyle="white"
+char="."
+}else{
+ctx.fillStyle="white"
+char="█"
+}
 
 }else{
 
@@ -112,6 +155,8 @@ ctx.fillStyle="rgb("+r+","+g+","+b+")"
 }
 
 ctx.fillText(char,px,py)
+
+}
 
 }
 
