@@ -1,45 +1,60 @@
 body{
+
 margin:0;
-background:#000;
+background:black;
 font-family:monospace;
 display:flex;
 justify-content:center;
+
 }
 
 .app{
+
 width:95%;
-max-width:420px;
+max-width:500px;
 text-align:center;
 color:white;
+
 }
 
 .camera{
+
 width:100%;
-aspect-ratio:1/1;
+aspect-ratio:4/3;
 position:relative;
 margin-top:10px;
+
 }
 
 video{
+
 display:none;
+
 }
 
 #ascii{
+
 width:100%;
 height:100%;
 background:black;
 border-radius:12px;
+
 }
 
 #process{
+
 display:none;
+
 }
 
 .modes{
+
 margin-top:12px;
+
 }
 
 button{
+
 padding:10px 16px;
 margin:4px;
 border:none;
@@ -47,22 +62,29 @@ border-radius:8px;
 background:#00ffaa;
 color:black;
 font-weight:bold;
+
 }
 
 .record-panel{
+
 margin-top:14px;
+
 }
 
 #timer{
+
 font-size:22px;
 margin-bottom:6px;
+
 }
 
 #downloadBtn{
+
 display:none;
 padding:10px 16px;
 background:#008cff;
 color:white;
 border-radius:8px;
 text-decoration:none;
+
 }
