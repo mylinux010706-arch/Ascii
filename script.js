@@ -36,8 +36,8 @@ setInterval(detectFaces,500)
 
 video.onloadeddata=()=>{
 
-ascii.width=640
-ascii.height=480
+ascii.width=360
+ascii.height=640
 
 draw()
 
@@ -46,23 +46,62 @@ draw()
 bwBtn.onclick=()=>mode="bw"
 colorBtn.onclick=()=>mode="color"
 
+function insideFace(x,y){
+
+for(let f of faces){
+
+let box=f.boundingBox
+
+let fx=box.x/video.videoWidth*process.width
+let fy=box.y/video.videoHeight*process.height
+let fw=box.width/video.videoWidth*process.width
+let fh=box.height/video.videoHeight*process.height
+
+if(x>fx && x<fx+fw && y>fy && y<fy+fh){
+return true
+}
+
+}
+
+return false
+}
+
 function draw(){
 
 let gridX
 let gridY
 
 if(mode==="color"){
-gridX=28
-gridY=21
+gridX=26
+gridY=46
 }else{
-gridX=60
-gridY=45
+gridX=40
+gridY=72
 }
 
 process.width=gridX
 process.height=gridY
 
-pctx.drawImage(video,0,0,gridX,gridY)
+let vw=video.videoWidth
+let vh=video.videoHeight
+
+let targetRatio=9/16
+let videoRatio=vw/vh
+
+let sx=0
+let sy=0
+let sw=vw
+let sh=vh
+
+if(videoRatio>targetRatio){
+sw=vh*targetRatio
+sx=(vw-sw)/2
+}else{
+sh=vw/targetRatio
+sy=(vh-sh)/2
+}
+
+pctx.drawImage(video,sx,sy,sw,sh,0,0,gridX,gridY)
 
 let frame=pctx.getImageData(0,0,gridX,gridY)
 let data=frame.data
@@ -89,6 +128,10 @@ let brightness=(r*0.299+g*0.587+b*0.114)
 
 let char=chars[Math.floor(brightness/255*(chars.length-1))]
 
+if(insideFace(x,y)){
+char="0"
+}
+
 let px=x*cw
 let py=y*ch
 
@@ -113,30 +156,6 @@ ctx.fillText(char,px,py)
 }
 
 }
-
-faces.forEach(face=>{
-
-let box=face.boundingBox
-
-let fx=box.x/video.videoWidth*ascii.width
-let fy=box.y/video.videoHeight*ascii.height
-
-let fw=box.width/video.videoWidth*ascii.width
-let fh=box.height/video.videoHeight*ascii.height
-
-ctx.fillStyle="black"
-ctx.fillRect(fx,fy,fw,fh)
-
-ctx.fillStyle="white"
-ctx.font="bold 50px monospace"
-
-for(let y=fy;y<fy+fh;y+=50){
-for(let x=fx;x<fx+fw;x+=50){
-ctx.fillText("X",x,y)
-}
-}
-
-})
 
 requestAnimationFrame(draw)
 
