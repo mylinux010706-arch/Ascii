@@ -21,8 +21,8 @@ color:white;
 
 width:100%;
 aspect-ratio:9/16;
-position:relative;
 margin-top:10px;
+position:relative;
 
 }
 
@@ -35,7 +35,7 @@ display:none;
 #ascii{
 
 width:100%;
-height:auto;
+height:100%;
 display:block;
 background:black;
 border-radius:12px;
@@ -48,27 +48,27 @@ display:none;
 
 }
 
-.modes{
+.mode-panel{
 
-margin-top:12px;
+margin-top:18px;
+
+}
+
+.record-panel{
+
+margin-top:18px;
 
 }
 
 button{
 
 padding:10px 16px;
-margin:4px;
+margin:5px;
 border:none;
 border-radius:8px;
 background:#00ffaa;
 color:black;
 font-weight:bold;
-
-}
-
-.record-panel{
-
-margin-top:14px;
 
 }
 
