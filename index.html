@@ -1,28 +1,33 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 <meta charset="UTF-8">
-<title>ASCII Camera</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ASCII Camera Recorder</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
 <body>
-<div class="container">
+
+<div class="app">
 
 <h1>ASCII Camera</h1>
 
-<div class="controls">
-<button id="colorBtn">ASCII Color</button>
-<button id="monoBtn">ASCII Mono</button>
-</div>
-
+<div class="video-area">
 <video id="video" autoplay playsinline></video>
-<canvas id="canvas"></canvas>
+<canvas id="asciiCanvas"></canvas>
+<canvas id="processCanvas"></canvas>
+</div>
 
-<pre id="ascii"></pre>
+<div class="controls">
+<button id="startRecord">Start Record</button>
+<button id="stopRecord">Stop Record</button>
+<a id="downloadLink">Download</a>
+</div>
 
 </div>
+
 <script src="script.js"></script>
+
 </body>
 </html>
