@@ -16,7 +16,7 @@ const timer=document.getElementById("timer")
 
 let mode="bw"
 
-const chars="█▓▒@#MWB8&%$xo+=-:. "
+const chars="█▓▒#@MW8B&%$+=-:. "
 
 let faceDetector
 let faces=[]
@@ -33,22 +33,16 @@ let timerInterval
 
 
 if("FaceDetector" in window){
-
 faceDetector=new FaceDetector({fastMode:true,maxDetectedFaces:5})
-
 }
 
 
 
 navigator.mediaDevices.getUserMedia({
-
 video:{facingMode:"user"}
-
 }).then(stream=>{
-
 video.srcObject=stream
 video.play()
-
 })
 
 
@@ -58,8 +52,8 @@ video.onloadeddata=()=>{
 ascii.width=640
 ascii.height=480
 
-process.width=64
-process.height=48
+process.width=60
+process.height=45
 
 detectFaces()
 
@@ -79,9 +73,7 @@ async function detectFaces(){
 if(!faceDetector)return
 
 try{
-
 faces=await faceDetector.detect(video)
-
 }catch(e){}
 
 requestAnimationFrame(detectFaces)
@@ -112,9 +104,7 @@ let fw=box.width/video.videoWidth*process.width
 let fh=box.height/video.videoHeight*process.height
 
 if(x>fx && x<fx+fw && y>fy && y<fy+fh){
-
 return true
-
 }
 
 }
@@ -168,7 +158,7 @@ ctx.fillRect(0,0,ascii.width,ascii.height)
 let cw=ascii.width/process.width
 let ch=ascii.height/process.height
 
-ctx.font="bold "+(ch*1.3)+"px monospace"
+ctx.font="bold "+(ch*1.2)+"px monospace"
 
 
 
@@ -176,30 +166,22 @@ for(let y=0;y<process.height;y++){
 
 for(let x=0;x<process.width;x++){
 
-let face=insideFace(x,y)
+if(insideFace(x,y)){
 
-let char
-let color
+let px=x*cw
+let py=y*ch
 
+ctx.fillStyle="black"
+ctx.fillRect(px,py,cw,ch)
 
+ctx.fillStyle="white"
+ctx.fillText("X",px,py)
 
-if(face){
-
-/* masker wajah */
-
-char="X"
-
-if((x+y)%2==0){
-
-color="white"
-
-}else{
-
-color="black"
+continue
 
 }
 
-}else{
+
 
 let i=(y*process.width+x)*4
 
@@ -207,35 +189,39 @@ let r=data[i]
 let g=data[i+1]
 let b=data[i+2]
 
-let brightness=(r+g+b)/3
-
-char=getChar(brightness)
-
-if(mode==="color"){
-
-color="rgb("+r+","+g+","+b+")"
-
-}else{
-
-color="white"
-
-}
-
-}
+let brightness=(r*0.299+g*0.587+b*0.114)
 
 
+
+let char=getChar(brightness)
 
 let px=x*cw
 let py=y*ch
 
 
 
-ctx.strokeStyle="black"
-ctx.lineWidth=2
+if(mode==="bw"){
 
-ctx.strokeText(char,px,py)
+if(brightness>140){
 
-ctx.fillStyle=color
+ctx.fillStyle="white"
+
+}else{
+
+ctx.fillStyle="white"
+
+char="█"
+
+}
+
+}else{
+
+ctx.fillStyle="rgb("+r+","+g+","+b+")"
+
+}
+
+
+
 ctx.fillText(char,px,py)
 
 }
@@ -253,13 +239,9 @@ requestAnimationFrame(draw)
 recordBtn.onclick=()=>{
 
 if(!recording){
-
 startRecording()
-
 }else{
-
 stopRecording()
-
 }
 
 }
