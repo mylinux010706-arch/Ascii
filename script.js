@@ -12,27 +12,11 @@ let mode="bw"
 
 const chars="█▓▒@#MWB8&%$+=-:. "
 
-let faces=[]
-let faceDetector
-
 navigator.mediaDevices.getUserMedia({
 video:{facingMode:"user"}
 }).then(stream=>{
 video.srcObject=stream
 })
-
-if("FaceDetector" in window){
-faceDetector=new FaceDetector({fastMode:true,maxDetectedFaces:2})
-}
-
-async function detectFaces(){
-if(!faceDetector)return
-try{
-faces=await faceDetector.detect(video)
-}catch(e){}
-}
-
-setInterval(detectFaces,500)
 
 video.onloadeddata=()=>{
 
@@ -46,34 +30,14 @@ draw()
 bwBtn.onclick=()=>mode="bw"
 colorBtn.onclick=()=>mode="color"
 
-function insideFace(x,y){
-
-for(let f of faces){
-
-let box=f.boundingBox
-
-let fx=box.x/video.videoWidth*process.width
-let fy=box.y/video.videoHeight*process.height
-let fw=box.width/video.videoWidth*process.width
-let fh=box.height/video.videoHeight*process.height
-
-if(x>fx && x<fx+fw && y>fy && y<fy+fh){
-return true
-}
-
-}
-
-return false
-}
-
 function draw(){
 
 let gridX
 let gridY
 
 if(mode==="color"){
-gridX=26
-gridY=46
+gridX=28
+gridY=50
 }else{
 gridX=40
 gridY=72
@@ -127,10 +91,6 @@ let b=data[i+2]
 let brightness=(r*0.299+g*0.587+b*0.114)
 
 let char=chars[Math.floor(brightness/255*(chars.length-1))]
-
-if(insideFace(x,y)){
-char="0"
-}
 
 let px=x*cw
 let py=y*ch
