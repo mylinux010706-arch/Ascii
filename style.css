@@ -1,53 +1,72 @@
 body{
-background:#0f0f0f;
+margin:0;
+background:black;
 color:white;
 font-family:monospace;
 display:flex;
 justify-content:center;
-align-items:center;
-height:100vh;
-margin:0;
 }
 
-.container{
+.app{
+width:100%;
+max-width:520px;
+padding:10px;
 text-align:center;
 }
 
 h1{
-font-size:40px;
-margin-bottom:20px;
-color:#00ffcc;
+font-size:28px;
+margin-bottom:10px;
 }
 
-.controls{
-margin-bottom:20px;
-}
-
-button{
-background:#00ffcc;
-border:none;
-padding:10px 20px;
-margin:5px;
-font-size:16px;
-cursor:pointer;
-border-radius:5px;
-}
-
-button:hover{
-background:#00ccaa;
+.camera-box{
+position:relative;
+width:100%;
 }
 
 video{
 display:none;
 }
 
-canvas{
+#asciiCanvas{
+width:100%;
+background:black;
+border-radius:8px;
+}
+
+#processCanvas{
 display:none;
 }
 
-#ascii{
-font-size:6px;
-line-height:6px;
-letter-spacing:1px;
-white-space:pre;
+.modes{
+margin-top:10px;
+display:flex;
+gap:8px;
+justify-content:center;
+flex-wrap:wrap;
+}
+
+.record{
+margin-top:10px;
+display:flex;
+gap:8px;
+justify-content:center;
+flex-wrap:wrap;
+}
+
+button{
+padding:10px 16px;
+border:none;
+border-radius:6px;
+background:#00ffaa;
+color:black;
+font-weight:bold;
+}
+
+a{
+padding:10px 16px;
+background:#008cff;
+color:white;
+border-radius:6px;
+text-decoration:none;
 }
