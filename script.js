@@ -16,7 +16,7 @@ const timer=document.getElementById("timer")
 
 let mode="bw"
 
-const chars="█▓▒@#MWB8&%$Xxo+=-:. "
+const chars="█▓▒@#MWB8&%$xo+=-:. "
 
 let faceDetector
 let faces=[]
@@ -168,13 +168,38 @@ ctx.fillRect(0,0,ascii.width,ascii.height)
 let cw=ascii.width/process.width
 let ch=ascii.height/process.height
 
-ctx.font="bold "+(ch*1.2)+"px monospace"
+ctx.font="bold "+(ch*1.3)+"px monospace"
 
 
 
 for(let y=0;y<process.height;y++){
 
 for(let x=0;x<process.width;x++){
+
+let face=insideFace(x,y)
+
+let char
+let color
+
+
+
+if(face){
+
+/* masker wajah */
+
+char="X"
+
+if((x+y)%2==0){
+
+color="white"
+
+}else{
+
+color="black"
+
+}
+
+}else{
 
 let i=(y*process.width+x)*4
 
@@ -184,26 +209,15 @@ let b=data[i+2]
 
 let brightness=(r+g+b)/3
 
-let char=getChar(brightness)
-
-let face=insideFace(x,y)
-
-
-
-if(face){
-
-char="X"
-ctx.fillStyle="white"
-
-}else{
+char=getChar(brightness)
 
 if(mode==="color"){
 
-ctx.fillStyle="rgb("+r+","+g+","+b+")"
+color="rgb("+r+","+g+","+b+")"
 
 }else{
 
-ctx.fillStyle="white"
+color="white"
 
 }
 
@@ -214,10 +228,14 @@ ctx.fillStyle="white"
 let px=x*cw
 let py=y*ch
 
+
+
 ctx.strokeStyle="black"
 ctx.lineWidth=2
 
 ctx.strokeText(char,px,py)
+
+ctx.fillStyle=color
 ctx.fillText(char,px,py)
 
 }
