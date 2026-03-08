@@ -9,7 +9,11 @@ const pctx=process.getContext("2d")
 const bwBtn=document.getElementById("bw")
 const colorBtn=document.getElementById("color")
 
+const ratio43=document.getElementById("ratio43")
+const ratio916=document.getElementById("ratio916")
+
 let mode="bw"
+let ratio="43"
 
 const chars="█▓▒@#MWB8&%$+=-:. "
 
@@ -27,14 +31,29 @@ faceDetector=new FaceDetector({fastMode:true,maxDetectedFaces:3})
 }
 
 async function detectFaces(){
+
 if(!faceDetector)return
+
 try{
 faces=await faceDetector.detect(video)
 }catch(e){}
+
 requestAnimationFrame(detectFaces)
 }
 
 video.onloadeddata=()=>{
+
+setResolution()
+
+detectFaces()
+
+draw()
+
+}
+
+function setResolution(){
+
+if(ratio==="43"){
 
 ascii.width=640
 ascii.height=480
@@ -42,13 +61,32 @@ ascii.height=480
 process.width=40
 process.height=30
 
-detectFaces()
+}
 
-draw()
+if(ratio==="916"){
+
+ascii.width=360
+ascii.height=640
+
+process.width=30
+process.height=54
+
+}
+
 }
 
 bwBtn.onclick=()=>mode="bw"
 colorBtn.onclick=()=>mode="color"
+
+ratio43.onclick=()=>{
+ratio="43"
+setResolution()
+}
+
+ratio916.onclick=()=>{
+ratio="916"
+setResolution()
+}
 
 function insideFace(x,y){
 
@@ -75,7 +113,7 @@ function draw(){
 let vw=video.videoWidth
 let vh=video.videoHeight
 
-let targetRatio=4/3
+let targetRatio=ratio==="43"?4/3:9/16
 let videoRatio=vw/vh
 
 let sx=0
@@ -84,11 +122,15 @@ let sw=vw
 let sh=vh
 
 if(videoRatio>targetRatio){
+
 sw=vh*targetRatio
 sx=(vw-sw)/2
+
 }else{
+
 sh=vw/targetRatio
 sy=(vh-sh)/2
+
 }
 
 pctx.drawImage(video,sx,sy,sw,sh,0,0,process.width,process.height)
@@ -123,14 +165,15 @@ let face=insideFace(x,y)
 
 if(face){
 
-ctx.font="bold "+(ch*50)+"px monospace"
+ctx.font="bold "+(ch*6)+"px monospace"
 
 if(brightness>120){
 ctx.fillStyle="white"
 }else{
 ctx.fillStyle="white"
-char="█"
 }
+
+char="X"
 
 ctx.fillText(char,px,py)
 
