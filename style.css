@@ -11,7 +11,7 @@ justify-content:center;
 .app{
 
 width:95%;
-max-width:520px;
+max-width:420px;
 text-align:center;
 color:white;
 
@@ -20,7 +20,7 @@ color:white;
 .camera{
 
 width:100%;
-aspect-ratio:4/3;
+aspect-ratio:9/16;
 position:relative;
 margin-top:10px;
 
