@@ -17,8 +17,8 @@ let ratio="43"
 
 const chars="█▓▒@#MWB8&%$+=-:. "
 
-let faceDetector
 let faces=[]
+let faceDetector=null
 
 navigator.mediaDevices.getUserMedia({
 video:{facingMode:"user"}
@@ -27,7 +27,7 @@ video.srcObject=stream
 })
 
 if("FaceDetector" in window){
-faceDetector=new FaceDetector({fastMode:true,maxDetectedFaces:3})
+faceDetector=new FaceDetector({fastMode:true,maxDetectedFaces:5})
 }
 
 async function detectFaces(){
@@ -39,6 +39,7 @@ faces=await faceDetector.detect(video)
 }catch(e){}
 
 requestAnimationFrame(detectFaces)
+
 }
 
 video.onloadeddata=()=>{
@@ -55,21 +56,21 @@ function setResolution(){
 
 if(ratio==="43"){
 
-ascii.width=640
-ascii.height=480
+ascii.width=800
+ascii.height=600
 
-process.width=40
-process.height=30
+process.width=80
+process.height=60
 
 }
 
 if(ratio==="916"){
 
-ascii.width=360
-ascii.height=640
+ascii.width=450
+ascii.height=800
 
-process.width=30
-process.height=54
+process.width=50
+process.height=90
 
 }
 
@@ -98,6 +99,9 @@ let fx=box.x/video.videoWidth*process.width
 let fy=box.y/video.videoHeight*process.height
 let fw=box.width/video.videoWidth*process.width
 let fh=box.height/video.videoHeight*process.height
+
+fw*=1.4
+fh*=1.4
 
 if(x>fx && x<fx+fw && y>fy && y<fy+fh){
 return true
@@ -165,13 +169,9 @@ let face=insideFace(x,y)
 
 if(face){
 
-ctx.font="bold "+(ch*6)+"px monospace"
+ctx.font="bold "+(ch*3)+"px monospace"
 
-if(brightness>120){
 ctx.fillStyle="white"
-}else{
-ctx.fillStyle="white"
-}
 
 char="X"
 
