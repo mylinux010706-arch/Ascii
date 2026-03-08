@@ -16,7 +16,7 @@ const timer=document.getElementById("timer")
 
 let mode="bw"
 
-const chars="@$#%&BWM*oahkbdpqwmZ0OQLCJUYXzcvunxrjft/|(){}[]<>?-_+~!;:,.'^`"
+const chars="@#$%&MWB8&%*oahkbdpqwmZ0OQLCJUYXzcvunxrjft/|(){}[]<>?-_+~!;:,."
 
 let recorder
 let chunks=[]
@@ -44,11 +44,11 @@ video.play()
 
 video.onloadeddata=()=>{
 
-ascii.width=480
-ascii.height=360
+ascii.width=640
+ascii.height=480
 
-process.width=70
-process.height=52
+process.width=60
+process.height=45
 
 draw()
 
@@ -61,9 +61,11 @@ colorBtn.onclick=()=>mode="color"
 
 
 
-function randomChar(){
+function getChar(brightness){
 
-return chars[Math.floor(Math.random()*chars.length)]
+let index=Math.floor(brightness/255*(chars.length-1))
+
+return chars[index]
 
 }
 
@@ -105,7 +107,7 @@ let b=data[i+2]
 
 let brightness=(r+g+b)/3
 
-let char=randomChar()
+let char=getChar(brightness)
 
 
 
@@ -115,7 +117,7 @@ ctx.fillStyle="rgb("+r+","+g+","+b+")"
 
 }else{
 
-ctx.fillStyle=brightness>120?"white":"black"
+ctx.fillStyle="white"
 
 }
 
