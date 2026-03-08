@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ASCII Camera Recorder</title>
+<title>ASCII Camera</title>
 <link rel="stylesheet" href="style.css">
 </head>
 
@@ -13,15 +14,21 @@
 
 <h1>ASCII Camera</h1>
 
-<div class="video-area">
+<div class="camera-box">
 <video id="video" autoplay playsinline></video>
 <canvas id="asciiCanvas"></canvas>
 <canvas id="processCanvas"></canvas>
 </div>
 
-<div class="controls">
-<button id="startRecord">Start Record</button>
-<button id="stopRecord">Stop Record</button>
+<div class="modes">
+<button id="colorMode">Color</button>
+<button id="greenMode">Hacker</button>
+<button id="whiteMode">White</button>
+</div>
+
+<div class="record">
+<button id="startRecord">Start</button>
+<button id="stopRecord">Stop</button>
 <a id="downloadLink">Download</a>
 </div>
 
