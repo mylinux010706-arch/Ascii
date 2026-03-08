@@ -16,7 +16,11 @@ const timer=document.getElementById("timer")
 
 let mode="bw"
 
-const chars="@#$%&MWB8*oahkbdpqwmZ0OQLCJUYXzcvunxrjft/|(){}[]<>?-_+~!;:,. "
+const chars="@#MWB8&%$xo+;:."
+
+let faceDetector
+
+let faces=[]
 
 let recorder
 let chunks=[]
@@ -29,11 +33,17 @@ let timerInterval
 
 
 
+if("FaceDetector" in window){
+
+faceDetector=new FaceDetector({fastMode:true,maxDetectedFaces:5})
+
+}
+
+
+
 navigator.mediaDevices.getUserMedia({
 
-video:{
-facingMode:"user"
-}
+video:{facingMode:"user"}
 
 }).then(stream=>{
 
@@ -46,13 +56,13 @@ video.play()
 
 video.onloadeddata=()=>{
 
-/* iphone 13 portrait ratio */
+ascii.width=640
+ascii.height=480
 
-ascii.width=360
-ascii.height=780
+process.width=80
+process.height=60
 
-process.width=60
-process.height=130
+detectFaces()
 
 draw()
 
@@ -62,6 +72,22 @@ draw()
 
 bwBtn.onclick=()=>mode="bw"
 colorBtn.onclick=()=>mode="color"
+
+
+
+async function detectFaces(){
+
+if(!faceDetector)return
+
+try{
+
+faces=await faceDetector.detect(video)
+
+}catch(e){}
+
+requestAnimationFrame(detectFaces)
+
+}
 
 
 
@@ -75,9 +101,59 @@ return chars[index]
 
 
 
+function insideFace(x,y){
+
+for(let f of faces){
+
+let box=f.boundingBox
+
+let fx=box.x/video.videoWidth*process.width
+let fy=box.y/video.videoHeight*process.height
+let fw=box.width/video.videoWidth*process.width
+let fh=box.height/video.videoHeight*process.height
+
+if(x>fx && x<fx+fw && y>fy && y<fy+fh){
+
+return true
+
+}
+
+}
+
+return false
+
+}
+
+
+
 function draw(){
 
-pctx.drawImage(video,0,0,process.width,process.height)
+let vw=video.videoWidth
+let vh=video.videoHeight
+
+let targetRatio=4/3
+let videoRatio=vw/vh
+
+let sx=0
+let sy=0
+let sw=vw
+let sh=vh
+
+if(videoRatio>targetRatio){
+
+sw=vh*targetRatio
+sx=(vw-sw)/2
+
+}else{
+
+sh=vw/targetRatio
+sy=(vh-sh)/2
+
+}
+
+
+
+pctx.drawImage(video,sx,sy,sw,sh,0,0,process.width,process.height)
 
 let frame=pctx.getImageData(0,0,process.width,process.height)
 
@@ -92,8 +168,6 @@ ctx.fillRect(0,0,ascii.width,ascii.height)
 
 let cw=ascii.width/process.width
 let ch=ascii.height/process.height
-
-
 
 ctx.font=ch+"px monospace"
 
@@ -115,6 +189,17 @@ let char=getChar(brightness)
 
 
 
+let face=insideFace(x,y)
+
+
+
+if(face){
+
+char="X"
+ctx.fillStyle="white"
+
+}else{
+
 if(mode==="color"){
 
 ctx.fillStyle="rgb("+r+","+g+","+b+")"
@@ -122,6 +207,8 @@ ctx.fillStyle="rgb("+r+","+g+","+b+")"
 }else{
 
 ctx.fillStyle="white"
+
+}
 
 }
 
@@ -165,15 +252,7 @@ recorder=new MediaRecorder(stream)
 
 chunks=[]
 
-
-
-recorder.ondataavailable=e=>{
-
-chunks.push(e.data)
-
-}
-
-
+recorder.ondataavailable=e=>chunks.push(e.data)
 
 recorder.onstop=()=>{
 
